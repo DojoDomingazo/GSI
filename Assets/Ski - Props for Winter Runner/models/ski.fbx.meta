@@ -1,0 +1,271 @@
+fileFormatVersion: 2
+guid: 4359e0f228110744096611de95e0343c
+ModelImporter:
+  serializedVersion: 23
+  fileIDToRecycleName:
+    100000: Armature
+    100002: barrier_1
+    100004: barrier_2
+    100006: barrier_3
+    100008: barrier_4
+    100010: barrier_5
+    100012: Body
+    100014: Body_2
+    100016: Bone.002
+    100018: character
+    100020: character_2
+    100022: fingers.L
+    100024: fingers.L_end
+    100026: fingers.R
+    100028: fingers.R_end
+    100030: foot.L
+    100032: foot.L_end
+    100034: foot.R
+    100036: foot.R_end
+    100038: General
+    100040: H.L
+    100042: H.R
+    100044: hand.L
+    100046: hand.R
+    100048: hand_2.L
+    100050: hand_2.R
+    100052: head
+    100054: IK.L
+    100056: ik.L
+    100058: IK.L_end
+    100060: IK.R
+    100062: ik.R
+    100064: IK.R_end
+    100066: leg.L
+    100068: leg.R
+    100070: mouth
+    100072: mouth_end
+    100074: shin.L
+    100076: shin.L_end
+    100078: shin.R
+    100080: shin.R_end
+    100082: //RootNode
+    100084: skis_1
+    100086: skis_2
+    100088: snow
+    100090: springboard
+    100092: tree
+    100094: trees
+    100096: way_1
+    400000: Armature
+    400002: barrier_1
+    400004: barrier_2
+    400006: barrier_3
+    400008: barrier_4
+    400010: barrier_5
+    400012: Body
+    400014: Body_2
+    400016: Bone.002
+    400018: character
+    400020: character_2
+    400022: fingers.L
+    400024: fingers.L_end
+    400026: fingers.R
+    400028: fingers.R_end
+    400030: foot.L
+    400032: foot.L_end
+    400034: foot.R
+    400036: foot.R_end
+    400038: General
+    400040: H.L
+    400042: H.R
+    400044: hand.L
+    400046: hand.R
+    400048: hand_2.L
+    400050: hand_2.R
+    400052: head
+    400054: IK.L
+    400056: ik.L
+    400058: IK.L_end
+    400060: IK.R
+    400062: ik.R
+    400064: IK.R_end
+    400066: leg.L
+    400068: leg.R
+    400070: mouth
+    400072: mouth_end
+    400074: shin.L
+    400076: shin.L_end
+    400078: shin.R
+    400080: shin.R_end
+    400082: //RootNode
+    400084: skis_1
+    400086: skis_2
+    400088: snow
+    400090: springboard
+    400092: tree
+    400094: trees
+    400096: way_1
+    2300000: barrier_1
+    2300002: barrier_2
+    2300004: barrier_3
+    2300006: barrier_4
+    2300008: barrier_5
+    2300010: snow
+    2300012: springboard
+    2300014: tree
+    2300016: trees
+    2300018: way_1
+    3300000: barrier_1
+    3300002: barrier_2
+    3300004: barrier_3
+    3300006: barrier_4
+    3300008: barrier_5
+    3300010: snow
+    3300012: springboard
+    3300014: tree
+    3300016: trees
+    3300018: way_1
+    4300000: barrier_5
+    4300002: springboard
+    4300004: barrier_4
+    4300006: barrier_3
+    4300008: barrier_2
+    4300010: barrier_1
+    4300012: snow
+    4300014: way_1
+    4300016: tree
+    4300018: trees
+    4300020: character_2
+    4300022: skis_2
+    4300024: skis_1
+    4300026: character
+    7400000: Armature|dead
+    7400002: Armature|left
+    7400004: Armature|right
+    7400006: Armature|run
+    7400008: Armature|sit
+    7400010: Armature|start
+    9500000: //RootNode
+    13700000: character
+    13700002: character_2
+    13700004: skis_1
+    13700006: skis_2
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: brown
+    second: {fileID: 2100000, guid: fbd97b5dffbb71340ac8aa740d894050, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: gray_2
+    second: {fileID: 2100000, guid: 41642c4a3f0193d4c998e77ca00d568f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: snow
+    second: {fileID: 2100000, guid: b128bb24f46249b4fa06b69691970db3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: snow_blue
+    second: {fileID: 2100000, guid: bcf17eb3160971f40927a5c58fc934aa, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree_gray
+    second: {fileID: 2100000, guid: 301c74965071c1e4c8e3d27c46cd4b01, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tree_green
+    second: {fileID: 2100000, guid: e4ffad45bfd888d43b0bcb9194e80204, type: 2}
+  materials:
+    importMaterials: 1
+    materialName: 1
+    materialSearch: 1
+    materialLocation: 0
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    importVisibility: 0
+    importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    swapUVChannels: 0
+    generateSecondaryUV: 1
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    indexFormat: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    previousCalculatedGlobalScale: 0.01
+    hasPreviousCalculatedGlobalScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 68920
+  packageName: Ski - Props for Winter Runner
+  packageVersion: 2.0
+  assetPath: Assets/Ski - Props for Winter Runner/models/ski.fbx
+  uploadId: 617750
