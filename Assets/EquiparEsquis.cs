@@ -8,6 +8,7 @@ public class EquiparEsquis : MonoBehaviour
     [SerializeField] private Rigidbody cuerpoRigidbody;
     [SerializeField] private PhysicsMaterial materialConEsquis;
     [SerializeField] private GameObject esquisAgarrables;
+    [SerializeField] private NavegacionEsqui navegacion;
 
     private bool equipado;
 
@@ -31,6 +32,10 @@ public class EquiparEsquis : MonoBehaviour
         cuerpoCollider.sharedMaterial = materialConEsquis;
         cuerpoRigidbody.WakeUp();
 
+        if (navegacion != null)
+        {
+            navegacion.enabled = true;
+        }
         StartCoroutine(OcultarEsquisTrasUnFrame());
 
         Debug.Log("Esquís puestos");
