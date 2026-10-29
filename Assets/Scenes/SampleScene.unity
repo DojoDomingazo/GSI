@@ -1024,7 +1024,7 @@ MonoBehaviour:
   esquis: {fileID: 1103406550}
   colocarJugadorAlInicio: 1
   distanciaInicio: 3
-  alturaInicio: 1.2
+  alturaInicio: 1.05
   offsetEsquis: {x: 0.3, y: 0.2, z: 0.5}
   materialNieve: {fileID: 2100000, guid: b128bb24f46249b4fa06b69691970db3, type: 2}
   materialFisico: {fileID: 13400000, guid: a4a9d3740c2d80d48b5d32a51f314782, type: 2}
@@ -1750,6 +1750,7 @@ MonoBehaviour:
   materialConEsquis: {fileID: 13400000, guid: 01a17efa74d91e04fb9d09aa32bb53cf, type: 2}
   esquisAgarrables: {fileID: 1103313398}
   navegacion: {fileID: 514795956}
+  congelarHastaTenerEsquis: 1
 --- !u!114 &514795956
 MonoBehaviour:
   m_ObjectHideFlags: 0
