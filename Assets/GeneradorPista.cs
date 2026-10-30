@@ -17,7 +17,13 @@ public class GeneradorPista : MonoBehaviour
     [SerializeField] private bool colocarJugadorAlInicio = true;
     [SerializeField] private float distanciaInicio = 3f;
     [SerializeField] private float alturaInicio = 1.2f;
-    [SerializeField] private Vector3 offsetEsquis = new Vector3(0.3f, 0.2f, 0.5f);
+    [SerializeField] private Vector3 offsetEsquis = new Vector3(1.5f, 0.9f, 0.3f);
+    [SerializeField] private float alturaEsquisSobreSuelo = 0.05f;
+    [SerializeField] private Transform panelMenu;
+    [SerializeField] private Vector3 offsetPanel = new Vector3(0f, 0.5f, 1.2f); // lateral, altura, distancia desde el centro del cuerpo
+    [SerializeField] private bool usarPosicionDelEditor = true;
+
+
 
     [Header("Materiales")]
     [SerializeField] private Material materialNieve;
@@ -117,13 +123,17 @@ public class GeneradorPista : MonoBehaviour
 
     private void ColocarJugador()
     {
-        if (cuerpoJugador == null)
+        Vector3 dir = Quaternion.Euler(0f, rumboBase, 0f) * Vector3.forward;
+        Vector3 offsetEditor = Vector3.zero;
+        if (panelMenu != null && usarPosicionDelEditor)
         {
-            Debug.LogWarning("[Pista] Falta Cuerpo Jugador.");
-            return;
+            Vector3 d0 = panelMenu.position - cuerpoJugador.position;
+            Vector3 der0 = Vector3.Cross(Vector3.up, dir).normalized;
+            offsetEditor = new Vector3(Vector3.Dot(d0, der0), d0.y, Vector3.Dot(d0, dir));
         }
 
-        Vector3 dir = Quaternion.Euler(0f, rumboBase, 0f) * Vector3.forward;
+
+
         Vector3 origen = puntoInicio.position + dir * distanciaInicio + Vector3.up * 30f;
 
         Physics.SyncTransforms();
@@ -151,10 +161,37 @@ public class GeneradorPista : MonoBehaviour
         cuerpoJugador.linearVelocity = Vector3.zero;
         cuerpoJugador.angularVelocity = Vector3.zero;
 
+        if (panelMenu != null)
+        {
+            Vector3 off = usarPosicionDelEditor ? offsetEditor : offsetPanel;
+            Vector3 derechaPanel = Vector3.Cross(Vector3.up, dir).normalized;
+            panelMenu.position = destino + derechaPanel * off.x + Vector3.up * off.y + dir * off.z;
+            panelMenu.rotation = Quaternion.LookRotation(dir, Vector3.up);
+            Debug.Log($"[Pista] Panel colocado. Offset usado (lateral, altura, distancia): {off}");
+        }
+
+
         if (esquis != null)
         {
             Vector3 derecha = Vector3.Cross(Vector3.up, dir).normalized;
-            esquis.position = destino + derecha * offsetEsquis.x + Vector3.up * offsetEsquis.y + dir * offsetEsquis.z;
+            Vector3 posEsquis = destino + derecha * offsetEsquis.x + dir * offsetEsquis.z;
+
+            // Buscamos el suelo justo debajo de esa posición, para que no floten en la pendiente
+            float mejorEsquis = float.MaxValue;
+            Vector3 sueloEsquis = Vector3.zero;
+            bool hayEsquis = false;
+
+            foreach (RaycastHit h in Physics.RaycastAll(posEsquis + Vector3.up * 5f, Vector3.down, 20f, ~0, QueryTriggerInteraction.Ignore))
+            {
+                if (!h.collider.name.StartsWith("Tramo_") || h.distance >= mejorEsquis) continue;
+                mejorEsquis = h.distance;
+                sueloEsquis = h.point;
+                hayEsquis = true;
+            }
+
+            esquis.position = hayEsquis
+                ? sueloEsquis + Vector3.up * alturaEsquisSobreSuelo
+                : posEsquis + Vector3.up * offsetEsquis.y;
         }
 
         Physics.SyncTransforms();
@@ -182,6 +219,25 @@ public class GeneradorPista : MonoBehaviour
             if (mf != null && mf.sharedMesh != null) Destroy(mf.sharedMesh);
             Destroy(viejo.objeto);
         }
+    }
+
+    [ContextMenu("Guardar posición del panel respecto al cuerpo")]
+    private void GuardarOffsetPanel()
+    {
+        if (panelMenu == null || cuerpoJugador == null || puntoInicio == null)
+        {
+            Debug.LogWarning("[Pista] Faltan Panel Menu, Cuerpo Jugador o Punto Inicio.");
+            return;
+        }
+
+        Vector3 f = puntoInicio.forward;
+        f.y = 0f;
+        f.Normalize();
+        Vector3 derecha = Vector3.Cross(Vector3.up, f).normalized;
+        Vector3 d = panelMenu.position - cuerpoJugador.transform.position;
+
+        offsetPanel = new Vector3(Vector3.Dot(d, derecha), d.y, Vector3.Dot(d, f));
+        Debug.Log($"[Pista] Offset del panel guardado: {offsetPanel}");
     }
 
     private void GenerarTramo()
