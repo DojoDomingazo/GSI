@@ -1416,7 +1416,6 @@ MonoBehaviour:
   arboles:
   - {fileID: 1038177283}
   trampolin: {fileID: 908044951}
-  ancho: 16
   largoPaso: 6
   filasPorTramo: 8
   filasPlanasIniciales: 0
@@ -1430,7 +1429,6 @@ MonoBehaviour:
   distanciaBorrado: 150
   semilla: 0
   mostrarDebug: 1
-  probValla: 0.9
   alturaExtraValla: 0
   giroExtraValla: 0
   arbolesMin: 3
@@ -2186,7 +2184,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 514795949}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -2294,6 +2292,24 @@ MonoBehaviour:
   separacionMinima: 0.15
   suavizado: 15
   curvaRespuesta: 0.7
+  frenoGiro: 0.2
+  velocidadMinimaFrenoGiro: 4
+  distanciaMaximaSuelo: 1.6
+  permitirRemar: 1
+  umbralRemo: 1
+  aceleracionRemo: 1.5
+  aceleracionRemoMax: 6
+  suavizadoMano: 20
+  velocidadTope: 40
+  permitirTuck: 1
+  descensoManosTuck: 1.1
+  exigirAgacharse: 1
+  descensoCabezaTuck: 0.3
+  confirmacionTuck: 0.2
+  aceleracionTuck: 2
+  crecimientoTuck: 1
+  aceleracionTuckMax: 10
+  giroQueCortaTuck: 0.2
   usarStickParaPruebas: 0
   mostrarDebug: 1
   estado: 
@@ -2304,6 +2320,17 @@ MonoBehaviour:
   velocidadMs: 0
   rumboGrados: 0
   objetoSuelo: 
+  distanciaSuelo: 0
+  frenoActualPorSegundo: 0
+  atrasManoIzquierda: 0
+  atrasManoDerecha: 0
+  aceleracionRemoActual: 0
+  alturaDePie: 0
+  bajadaCabeza: 0
+  bajadaManos: 0
+  posturaTuck: 0
+  tiempoEnTuck: 0
+  aceleracionTuckActual: 0
 --- !u!114 &514795957
 MonoBehaviour:
   m_ObjectHideFlags: 0

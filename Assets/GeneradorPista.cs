@@ -36,8 +36,10 @@ public class GeneradorPista : MonoBehaviour
     [SerializeField] private GameObject[] arboles;
     [SerializeField] private GameObject trampolin;
 
+    // Ancho de la pista en metros. Es una constante: para cambiarlo, cambia este número.
+    private const float ancho = 30f;
+
     [Header("Forma de la pista")]
-    [SerializeField] private float ancho = 16f;
     [SerializeField] private float largoPaso = 6f;
     [SerializeField] private int filasPorTramo = 8;
     [SerializeField] private int filasPlanasIniciales = 4;
@@ -55,7 +57,6 @@ public class GeneradorPista : MonoBehaviour
     [SerializeField] private bool mostrarDebug = true;
 
     [Header("Vallas")]
-    [Range(0f, 1f)][SerializeField] private float probValla = 0.9f;
     [SerializeField] private float alturaExtraValla = 0f;
     [SerializeField] private float giroExtraValla = 0f;
 
@@ -87,6 +88,8 @@ public class GeneradorPista : MonoBehaviour
     private float rumboBase, rumboActual, curvaturaActual, pendienteActual, pendienteObjetivo;
     private int filasGeneradas, tramosGenerados;
     private float largoValla, giroValla;
+    private bool largoVallaEnX;
+    private float desfaseLargoValla; // cuánto se aparta el centro de la valla de su pivote, a lo largo de la valla
 
     private void Start()
     {
@@ -261,7 +264,7 @@ public class GeneradorPista : MonoBehaviour
         }
 
         GameObject tramo = CrearMalla(centros, rumbos);
-        int objetos = PoblarTramo(tramo.transform, centros);
+        int objetos = PoblarTramo(tramo.transform, centros, rumbos);
         tramos.Enqueue(new Tramo { objeto = tramo, fin = centroActual });
 
         if (mostrarDebug)
@@ -317,7 +320,7 @@ public class GeneradorPista : MonoBehaviour
         return go;
     }
 
-    private int PoblarTramo(Transform padre, List<Vector3> centros)
+    private int PoblarTramo(Transform padre, List<Vector3> centros, List<float> rumbos)
     {
         int n = centros.Count;
         float[] acum = new float[n];
@@ -325,20 +328,11 @@ public class GeneradorPista : MonoBehaviour
         float total = acum[n - 1];
         int contador = 0;
 
-        // Vallas a los dos lados, con huecos al azar
+        // Vallas continuas a los dos lados, siguiendo el borde real de la pista (sin huecos)
         if (vallas != null && vallas.Length > 0 && largoValla > 0.1f)
         {
-            for (float s = largoValla * 0.5f; s <= total - largoValla * 0.5f; s += largoValla)
-            {
-                for (int lado = -1; lado <= 1; lado += 2)
-                {
-                    if (Azar() > probValla) continue;
-                    Muestrear(centros, acum, s, out Vector3 posV, out Vector3 adelV, out Vector3 derV);
-                    Vector3 posicion = posV + derV * (lado * ancho * 0.5f) + Vector3.up * alturaExtraValla;
-                    Quaternion rotacion = Quaternion.LookRotation(adelV, Vector3.up) * Quaternion.Euler(0f, giroValla + giroExtraValla, 0f);
-                    if (Colocar(Elegir(vallas), posicion, rotacion, padre) != null) contador++;
-                }
-            }
+            contador += PonerVallasBorde(padre, centros, rumbos, -1);
+            contador += PonerVallasBorde(padre, centros, rumbos, 1);
         }
 
         // Árboles al azar dentro de la pista
@@ -370,6 +364,57 @@ public class GeneradorPista : MonoBehaviour
         }
 
         return contador;
+    }
+
+    // Pone vallas pegadas al borde de la malla, sin huecos. Cada tramo reparte sus vallas entre sus dos
+    // extremos (estirándolas o encogiéndolas un poco), así que empalman con las del tramo siguiente.
+    private int PonerVallasBorde(Transform padre, List<Vector3> centros, List<float> rumbos, int lado)
+    {
+        int n = centros.Count;
+        Vector3[] borde = new Vector3[n];
+        float[] acumBorde = new float[n];
+
+        // El borde son exactamente los vértices de la malla de ese lado
+        for (int i = 0; i < n; i++)
+        {
+            Vector3 adelante = Quaternion.Euler(0f, rumbos[i], 0f) * Vector3.forward;
+            Vector3 derecha = Vector3.Cross(Vector3.up, adelante).normalized;
+            borde[i] = centros[i] + derecha * (lado * ancho * 0.5f);
+            if (i > 0) acumBorde[i] = acumBorde[i - 1] + Vector3.Distance(borde[i], borde[i - 1]);
+        }
+
+        float totalBorde = acumBorde[n - 1];
+        int cuantas = Mathf.Max(1, Mathf.CeilToInt(totalBorde / largoValla));
+        float largoReal = totalBorde / cuantas;
+        float estiramiento = largoReal / largoValla;
+        Vector3 escala = largoVallaEnX ? new Vector3(estiramiento, 1f, 1f) : new Vector3(1f, 1f, estiramiento);
+        Vector3 desfaseLocal = largoVallaEnX
+            ? new Vector3(desfaseLargoValla * estiramiento, 0f, 0f)
+            : new Vector3(0f, 0f, desfaseLargoValla * estiramiento);
+
+        int puestas = 0;
+        for (int j = 0; j < cuantas; j++)
+        {
+            float s = (j + 0.5f) * largoReal;
+
+            int k = 0;
+            while (k < n - 2 && acumBorde[k + 1] < s) k++;
+            float largoSegmento = acumBorde[k + 1] - acumBorde[k];
+            float t = largoSegmento > 0.0001f ? Mathf.Clamp01((s - acumBorde[k]) / largoSegmento) : 0f;
+
+            Vector3 centro = Vector3.Lerp(borde[k], borde[k + 1], t) + Vector3.up * alturaExtraValla;
+            Vector3 direccion = (borde[k + 1] - borde[k]).normalized;
+            Quaternion rotacion = Quaternion.LookRotation(direccion, Vector3.up) * Quaternion.Euler(0f, giroValla + giroExtraValla, 0f);
+
+            // Si el pivote de la valla no está en su centro, lo compensamos a lo largo de la valla
+            Vector3 posicion = centro - rotacion * desfaseLocal;
+
+            GameObject valla = Colocar(Elegir(vallas), posicion, rotacion, padre);
+            if (valla == null) continue;
+            valla.transform.localScale = Vector3.Scale(valla.transform.localScale, escala);
+            puestas++;
+        }
+        return puestas;
     }
 
     private void Muestrear(List<Vector3> centros, float[] acum, float s, out Vector3 pos, out Vector3 adelante3D, out Vector3 derecha)
@@ -437,6 +482,8 @@ public class GeneradorPista : MonoBehaviour
             bool largoEnX = b.size.x > b.size.z;
             largoValla = largoEnX ? b.size.x : b.size.z;
             giroValla = largoEnX ? -90f : 0f;
+            largoVallaEnX = largoEnX;
+            desfaseLargoValla = largoEnX ? b.center.x : b.center.z;
         }
         DestroyImmediate(temp);
         largoVallaMedido = largoValla;
