@@ -9,6 +9,10 @@ public class GeneradorPista : MonoBehaviour
         public Vector3 fin;
     }
 
+    // Posición fija de los esquís en el mundo. No es un campo del Inspector,
+    // así que lo que pongas aquí es lo que manda siempre.
+    private static readonly Vector3 posicionEsquis = new Vector3(-434.03f, -746.08f, -125.72f);
+
     [Header("Referencias")]
     [SerializeField] private Transform jugador;
     [SerializeField] private Transform puntoInicio;
@@ -17,8 +21,6 @@ public class GeneradorPista : MonoBehaviour
     [SerializeField] private bool colocarJugadorAlInicio = true;
     [SerializeField] private float distanciaInicio = 3f;
     [SerializeField] private float alturaInicio = 1.2f;
-    [SerializeField] private Vector3 offsetEsquis = new Vector3(1.5f, 0.9f, 0.3f);
-    [SerializeField] private float alturaEsquisSobreSuelo = 0.05f;
     [SerializeField] private Transform panelMenu;
     [SerializeField] private Vector3 offsetPanel = new Vector3(0f, 0.5f, 1.2f); // lateral, altura, distancia desde el centro del cuerpo
     [SerializeField] private bool usarPosicionDelEditor = true;
@@ -173,25 +175,8 @@ public class GeneradorPista : MonoBehaviour
 
         if (esquis != null)
         {
-            Vector3 derecha = Vector3.Cross(Vector3.up, dir).normalized;
-            Vector3 posEsquis = destino + derecha * offsetEsquis.x + dir * offsetEsquis.z;
-
-            // Buscamos el suelo justo debajo de esa posición, para que no floten en la pendiente
-            float mejorEsquis = float.MaxValue;
-            Vector3 sueloEsquis = Vector3.zero;
-            bool hayEsquis = false;
-
-            foreach (RaycastHit h in Physics.RaycastAll(posEsquis + Vector3.up * 5f, Vector3.down, 20f, ~0, QueryTriggerInteraction.Ignore))
-            {
-                if (!h.collider.name.StartsWith("Tramo_") || h.distance >= mejorEsquis) continue;
-                mejorEsquis = h.distance;
-                sueloEsquis = h.point;
-                hayEsquis = true;
-            }
-
-            esquis.position = hayEsquis
-                ? sueloEsquis + Vector3.up * alturaEsquisSobreSuelo
-                : posEsquis + Vector3.up * offsetEsquis.y;
+            esquis.position = posicionEsquis;
+            if (mostrarDebug) Debug.Log($"[Pista] Esquís colocados en {posicionEsquis}");
         }
 
         Physics.SyncTransforms();

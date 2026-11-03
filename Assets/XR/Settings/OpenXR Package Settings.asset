@@ -290,7 +290,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b7365b139f7aec43b23d26b7a48b5a6, type: 3}
   m_Name: MetaQuestTouchPlusControllerProfile Android
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.Features.Interactions.MetaQuestTouchPlusControllerProfile
-  m_enabled: 1
+  m_enabled: 0
   nameUi: Meta Quest Touch Plus Controller Profile
   version: 0.0.1
   featureIdInternal: com.unity.openxr.feature.input.metaquestplus
@@ -978,7 +978,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f647cc0545697264a9878224faada6d5, type: 3}
   m_Name: MetaQuestFeature Android
   m_EditorClassIdentifier: Unity.XR.OpenXR.Features.MetaQuestSupport::UnityEngine.XR.OpenXR.Features.MetaQuestSupport.MetaQuestFeature
-  m_enabled: 1
+  m_enabled: 0
   nameUi: Meta Quest Support
   version: 1.0.0
   featureIdInternal: com.unity.openxr.feature.metaquest
@@ -1132,7 +1132,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4b862ee14fb479fbfe5fffe655d3ed3, type: 3}
   m_Name: MetaQuestTouchProControllerProfile Android
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.Features.Interactions.MetaQuestTouchProControllerProfile
-  m_enabled: 1
+  m_enabled: 0
   nameUi: Meta Quest Touch Pro Controller Profile
   version: 0.0.1
   featureIdInternal: com.unity.openxr.feature.input.metaquestpro
@@ -1221,37 +1221,37 @@ MonoBehaviour:
   m_Name: Standalone
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.OpenXRSettings
   features:
-  - {fileID: -8652202391159150036}
-  - {fileID: 2168146213265725718}
-  - {fileID: 2704070547679995825}
-  - {fileID: 5152678800738221559}
-  - {fileID: -5284057472391368584}
-  - {fileID: -1664095138496612001}
   - {fileID: -5956879603740602421}
-  - {fileID: -9049187450605344932}
-  - {fileID: -7114854338938040784}
-  - {fileID: -2707858056733992569}
-  - {fileID: -3437624993394094687}
-  - {fileID: -3165155479156553910}
-  - {fileID: 8500233303427278089}
-  - {fileID: -7050329579918658041}
-  - {fileID: -2258374295474110524}
-  - {fileID: -178839610903742863}
-  - {fileID: -4848687966123072698}
-  - {fileID: -3298615385462456743}
-  - {fileID: 1918469966159409803}
-  - {fileID: -1505489402471216936}
-  - {fileID: 1970907817212153660}
-  - {fileID: 2128055570876485020}
-  - {fileID: -4984082420082471520}
-  - {fileID: 5960699499189755663}
-  - {fileID: 8948245052551931901}
-  - {fileID: 2194449654892399685}
-  - {fileID: 8403309606769947138}
-  - {fileID: 7587475510968542593}
+  - {fileID: 2704070547679995825}
+  - {fileID: -1664095138496612001}
   - {fileID: -7611433269502723286}
-  - {fileID: -1740003759284774463}
+  - {fileID: 7587475510968542593}
+  - {fileID: 5960699499189755663}
+  - {fileID: -2258374295474110524}
+  - {fileID: -1505489402471216936}
+  - {fileID: -5284057472391368584}
+  - {fileID: -7114854338938040784}
+  - {fileID: 1918469966159409803}
+  - {fileID: -2707858056733992569}
+  - {fileID: -9049187450605344932}
+  - {fileID: -3298615385462456743}
+  - {fileID: 2128055570876485020}
+  - {fileID: 8500233303427278089}
+  - {fileID: -3165155479156553910}
   - {fileID: 6016875267028092192}
+  - {fileID: -1740003759284774463}
+  - {fileID: 8403309606769947138}
+  - {fileID: 2194449654892399685}
+  - {fileID: 1970907817212153660}
+  - {fileID: -178839610903742863}
+  - {fileID: 2168146213265725718}
+  - {fileID: -3437624993394094687}
+  - {fileID: 8948245052551931901}
+  - {fileID: -7050329579918658041}
+  - {fileID: -8652202391159150036}
+  - {fileID: 5152678800738221559}
+  - {fileID: -4848687966123072698}
+  - {fileID: -4984082420082471520}
   customLoaderName: 
   m_renderMode: 1
   m_latencyOptimization: 0
@@ -1635,7 +1635,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feeef8d85de8db242bdda70cc7ff5acd, type: 3}
   m_Name: OculusTouchControllerProfile Android
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.Features.Interactions.OculusTouchControllerProfile
-  m_enabled: 1
+  m_enabled: 0
   nameUi: Oculus Touch Controller Profile
   version: 0.0.1
   featureIdInternal: com.unity.openxr.feature.input.oculustouch

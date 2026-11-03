@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Oculus.Interaction;
 
@@ -12,24 +13,18 @@ public class EquiparEsquis : MonoBehaviour
     [SerializeField] private bool congelarHastaTenerEsquis = true;
 
     [Header("Esquís")]
-    [SerializeField] private GameObject esquisAgarrables;          // skier_1
-    [SerializeField] private Transform direccionReferencia;        // PuntoInicio (hacia donde baja la pista)
-    [SerializeField] private float distanciaParaPonerse = 0.8f;    // metros al centro del cuerpo
-    [SerializeField] private float distanciaParaVolver = 2f;       // si los sueltas más lejos, vuelven a su sitio
-    [SerializeField] private Vector3 offsetPies = new Vector3(0f, -1f, 0f);  // lateral, altura, adelante desde el centro del cuerpo
-    [SerializeField] private Vector3 giroModelo = Vector3.zero;    // si el modelo mira de lado: prueba Y = 90, -90 o 180
+    [SerializeField] private GameObject esquisAgarrables;                    // skier_1
+    [SerializeField] private float distanciaHorizontalParaPonerse = 1.2f;    // metros, en horizontal, al centro del cuerpo
+    [SerializeField] private float retrasoActivarAgarre = 4f;                // segundos sin poder agarrar los esquís al empezar
 
     [Header("Solo lectura")]
     [SerializeField] private string estado = "ESPERANDO";
     [SerializeField] private float distanciaEsquis;
 
-    private bool equipado, siguiendoPies, encajado, poseGuardada;
+    private bool equipado, armado;
+    private float ultimoLog;
+    private readonly List<GameObject> interaccionesActivas = new List<GameObject>();
     private RigidbodyConstraints constraintsOriginales;
-    private Vector3 posicionInicial;
-    private Quaternion rotacionInicial;
-    private Vector3 rumbo = Vector3.forward;
-    private Coroutine rutinaVigilar, rutinaVolver;
-    private readonly RaycastHit[] golpes = new RaycastHit[8];
 
     private void Reset()
     {
@@ -39,85 +34,88 @@ public class EquiparEsquis : MonoBehaviour
 
     private void Awake()
     {
+        enabled = true; // Update tiene que correr aunque la casilla del componente estuviera desmarcada
+
+        // Al empezar los esquís no se pueden agarrar: evita conexiones fantasma del agarre a distancia
+        if (esquisAgarrables != null)
+        {
+            GuardarInteraccionesActivas();
+            CambiarInteraccion(false);
+            StartCoroutine(ActivarAgarreTrasRetraso());
+        }
+
         if (cuerpoRigidbody == null) return;
         constraintsOriginales = cuerpoRigidbody.constraints;
         if (congelarHastaTenerEsquis)
             cuerpoRigidbody.constraints = RigidbodyConstraints.FreezeAll;
     }
 
+    private IEnumerator ActivarAgarreTrasRetraso()
+    {
+        yield return new WaitForSeconds(retrasoActivarAgarre);
+        if (equipado) yield break;
+        CambiarInteraccion(true);
+        Debug.Log("[Esquis] Agarre activado", this);
+    }
+
+    // Solo recordamos los ISDK_ que estaban activos al empezar: los que tú dejes desactivados se quedan así
+    private void GuardarInteraccionesActivas()
+    {
+        interaccionesActivas.Clear();
+        foreach (Transform hijo in esquisAgarrables.transform)
+            if (hijo.name.StartsWith("ISDK_") && hijo.gameObject.activeSelf)
+                interaccionesActivas.Add(hijo.gameObject);
+    }
+
+    private void CambiarInteraccion(bool activa)
+    {
+        foreach (GameObject go in interaccionesActivas)
+            if (go != null) go.SetActive(activa);
+    }
+
     // ---------- Eventos del Pointable Unity Event Wrapper ----------
 
-    // El "When Select" que ya tenías conectado a este método ahora inicia el acercamiento
+    // El "When Select" conectado a este método arma la comprobación de distancia
     public void PonerEsquisDesdeAgarre(PointerEvent evento) { EmpezarAcercamiento(evento); }
 
     public void EmpezarAcercamiento(PointerEvent evento)
     {
-        if (equipado || esquisAgarrables == null) return;
-
-        if (!poseGuardada)
+        Debug.Log($"[Esquis] Evento recibido: {evento.Type} | origen: {evento.Data} | t = {Time.timeSinceLevelLoad:F1} s", this);
+        if (equipado || esquisAgarrables == null)
         {
-            posicionInicial = esquisAgarrables.transform.position;
-            rotacionInicial = esquisAgarrables.transform.rotation;
-            poseGuardada = true;
+            Debug.Log($"[Esquis] Ignorado: equipado = {equipado}, Esquis Agarrables asignado = {esquisAgarrables != null}", this);
+            return;
         }
 
-        if (rutinaVolver != null) { StopCoroutine(rutinaVolver); rutinaVolver = null; }
-        if (rutinaVigilar != null) StopCoroutine(rutinaVigilar);
-        rutinaVigilar = StartCoroutine(VigilarDistancia());
-        CambiarEstado("ACERCANDO");
+        if (!armado)
+        {
+            armado = true;
+            CambiarEstado("ACERCANDO");
+        }
     }
 
-    // Conéctalo a "When Unselect"
-    public void SoltadoEsquis(PointerEvent evento)
-    {
-        if (equipado) return;
-        if (rutinaVigilar != null) { StopCoroutine(rutinaVigilar); rutinaVigilar = null; }
-        rutinaVolver = StartCoroutine(VolverSiEstanLejos());
-    }
+    // "When Unselect": ya no hace falta, la comprobación sigue aunque se suelten.
+    // Se deja el método para no romper la conexión del Inspector.
+    public void SoltadoEsquis(PointerEvent evento) { }
 
     // ---------- Lógica ----------
 
-    private IEnumerator VigilarDistancia()
+    private void Update()
     {
-        float ultimoLog = 0f;
-        while (!equipado)
+        if (equipado || !armado || esquisAgarrables == null) return;
+
+        Vector3 esquis = esquisAgarrables.transform.position;
+        Vector3 cuerpo = cuerpoCollider.bounds.center;
+        distanciaEsquis = new Vector2(esquis.x - cuerpo.x, esquis.z - cuerpo.z).magnitude;
+
+        if (Time.time - ultimoLog > 0.25f)
         {
-            distanciaEsquis = Vector3.Distance(esquisAgarrables.transform.position, cuerpoCollider.bounds.center);
-
-            if (Time.time - ultimoLog > 0.25f)
-            {
-                Debug.Log($"[Esquis] distancia al cuerpo: {distanciaEsquis:F2} m (se ponen a < {distanciaParaPonerse:F2})", this);
-                ultimoLog = Time.time;
-            }
-
-            if (distanciaEsquis < distanciaParaPonerse)
-            {
-                PonerEsquis();
-                yield break;
-            }
-            yield return null;
+            Debug.Log($"[Esquis] distancia horizontal al cuerpo: {distanciaEsquis:F2} m (se ponen a < {distanciaHorizontalParaPonerse:F2})", this);
+            ultimoLog = Time.time;
         }
-    }
 
-    private IEnumerator VolverSiEstanLejos()
-    {
-        yield return new WaitForSeconds(1.5f);
-        if (equipado) yield break;
-
-        Transform t = esquisAgarrables.transform;
-        if (Vector3.Distance(t.position, cuerpoCollider.bounds.center) < distanciaParaVolver) yield break;
-
-        Vector3 desde = t.position;
-        Quaternion giroDesde = t.rotation;
-        for (float k = 0f; k < 1f; k += Time.deltaTime / 0.6f)
-        {
-            if (equipado) yield break;
-            t.SetPositionAndRotation(Vector3.Lerp(desde, posicionInicial, k), Quaternion.Slerp(giroDesde, rotacionInicial, k));
-            yield return null;
-        }
-        t.SetPositionAndRotation(posicionInicial, rotacionInicial);
-        CambiarEstado("ESPERANDO");
-        Debug.Log("[Esquis] Soltados lejos: vuelven a su sitio", this);
+        if (distanciaEsquis < distanciaHorizontalParaPonerse)
+            PonerEsquis();
     }
 
     [ContextMenu("Poner esquís (prueba)")]
@@ -131,81 +129,15 @@ public class EquiparEsquis : MonoBehaviour
         cuerpoRigidbody.WakeUp();
         if (navegacion != null) navegacion.enabled = true;
 
-        StartCoroutine(AcoplarAlosPies());
+        StartCoroutine(OcultarEsquisTrasUnFrame());
         CambiarEstado("EQUIPADO");
         Debug.Log("Esquís puestos");
     }
 
-    private IEnumerator AcoplarAlosPies()
+    private IEnumerator OcultarEsquisTrasUnFrame()
     {
         yield return null; // un frame: no tocamos el objeto mientras el SDK procesa el agarre
-
-        // Ya no se pueden coger
-        foreach (Transform hijo in esquisAgarrables.transform)
-            if (hijo.name.StartsWith("ISDK_")) hijo.gameObject.SetActive(false);
-
-        Grabbable grab = esquisAgarrables.GetComponent<Grabbable>();
-        if (grab != null) grab.enabled = false;
-
-        Collider col = esquisAgarrables.GetComponent<Collider>();
-        if (col != null) col.enabled = false;
-
-        // Rumbo inicial: hacia donde baja la pista
-        Vector3 f = direccionReferencia != null ? direccionReferencia.forward : cuerpoRigidbody.transform.forward;
-        f.y = 0f;
-        rumbo = f.sqrMagnitude > 0.001f ? f.normalized : Vector3.forward;
-
-        encajado = false;
-        siguiendoPies = true;
-        Debug.Log("[Esquis] Acoplados a los pies", this);
-    }
-
-    private void LateUpdate()
-    {
-        if (!siguiendoPies || esquisAgarrables == null) return;
-
-        Transform cuerpo = cuerpoRigidbody.transform;
-        Transform t = esquisAgarrables.transform;
-
-        // Los esquís apuntan hacia donde va el cuerpo
-        Vector3 v = cuerpoRigidbody.linearVelocity;
-        v.y = 0f;
-        if (v.sqrMagnitude > 1f)
-            rumbo = Vector3.Slerp(rumbo, v.normalized, 8f * Time.deltaTime).normalized;
-
-        Vector3 normal = BuscarNormalSuelo(cuerpo.position);
-        Vector3 adelante = Vector3.ProjectOnPlane(rumbo, normal);
-        if (adelante.sqrMagnitude < 0.0001f) adelante = rumbo;
-        adelante.Normalize();
-        Vector3 derecha = Vector3.Cross(normal, adelante);
-
-        Vector3 posicion = cuerpo.position + derecha * offsetPies.x + Vector3.up * offsetPies.y + adelante * offsetPies.z;
-        Quaternion rotacion = Quaternion.LookRotation(adelante, normal) * Quaternion.Euler(giroModelo);
-
-        if (!encajado)
-        {
-            t.position = Vector3.MoveTowards(t.position, posicion, 8f * Time.deltaTime);
-            if ((t.position - posicion).sqrMagnitude < 0.0004f) encajado = true;
-        }
-        else
-        {
-            t.position = posicion;
-        }
-        t.rotation = Quaternion.Slerp(t.rotation, rotacion, 12f * Time.deltaTime);
-    }
-
-    private Vector3 BuscarNormalSuelo(Vector3 desde)
-    {
-        int n = Physics.RaycastNonAlloc(desde, Vector3.down, golpes, 4f, ~0, QueryTriggerInteraction.Ignore);
-        float mejor = float.MaxValue;
-        Vector3 normal = Vector3.up;
-        for (int i = 0; i < n; i++)
-        {
-            if (!golpes[i].collider.name.StartsWith("Tramo_") || golpes[i].distance >= mejor) continue;
-            mejor = golpes[i].distance;
-            normal = golpes[i].normal;
-        }
-        return normal;
+        if (esquisAgarrables != null) esquisAgarrables.SetActive(false);
     }
 
     private void CambiarEstado(string nuevo)

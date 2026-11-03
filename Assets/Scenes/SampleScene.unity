@@ -1185,9 +1185,9 @@ RectTransform:
   m_LocalScale: {x: 0.004, y: 0.004, z: 0.004}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 679836607}
   - {fileID: 2025755904}
   - {fileID: 1660862824}
-  - {fileID: 679836607}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1406,8 +1406,6 @@ MonoBehaviour:
   colocarJugadorAlInicio: 1
   distanciaInicio: 3
   alturaInicio: 1.05
-  offsetEsquis: {x: 0.3, y: 0.2, z: 0.5}
-  alturaEsquisSobreSuelo: 0.05
   panelMenu: {fileID: 228767077}
   offsetPanel: {x: 0, y: 0.5, z: 1.2}
   usarPosicionDelEditor: 1
@@ -1759,9 +1757,9 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.94043326, g: 0.9622642, b: 0.06808472, a: 1}
+    m_PressedColor: {r: 0.043137256, g: 0.43529412, b: 0.43529412, a: 1}
+    m_SelectedColor: {r: 0.9411765, g: 0.9607843, b: 0.06666667, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -2260,7 +2258,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 514795949}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c8c5a9c52d9232540b9ef1d2c0e6197f, type: 3}
   m_Name: 
@@ -2271,11 +2269,8 @@ MonoBehaviour:
   navegacion: {fileID: 514795956}
   congelarHastaTenerEsquis: 1
   esquisAgarrables: {fileID: 1103313398}
-  direccionReferencia: {fileID: 1908842830}
-  distanciaParaPonerse: 0.8
-  distanciaParaVolver: 2
-  offsetPies: {x: 0, y: -1, z: 0}
-  giroModelo: {x: 0, y: 0, z: 0}
+  distanciaHorizontalParaPonerse: 1.2
+  retrasoActivarAgarre: 4
   estado: ESPERANDO
   distanciaEsquis: 0
 --- !u!114 &514795956
@@ -2743,7 +2738,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -17.599106, w: 0}
+  m_margin: {x: 0, y: 0, z: -17.599106, w: 255.7373}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -2914,7 +2909,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &828758344
 Transform:
   m_ObjectHideFlags: 0
@@ -3447,9 +3442,9 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.94043326, g: 0.9622642, b: 0.06808472, a: 1}
+    m_PressedColor: {r: 0.043137256, g: 0.43529412, b: 0.43529412, a: 1}
+    m_SelectedColor: {r: 0.9411765, g: 0.9607843, b: 0.06666667, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -5005,7 +5000,7 @@ Transform:
   m_GameObject: {fileID: 1103313398}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -436, y: -745, z: -127}
+  m_LocalPosition: {x: -435.5, y: -745, z: -123.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5422,9 +5417,9 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.94043326, g: 0.9622642, b: 0.06808472, a: 1}
+    m_PressedColor: {r: 0.043137256, g: 0.43529412, b: 0.43529412, a: 1}
+    m_SelectedColor: {r: 0.9411765, g: 0.9607843, b: 0.06666667, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -5798,9 +5793,9 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.94043326, g: 0.9622642, b: 0.06808472, a: 1}
+    m_PressedColor: {r: 0.043137256, g: 0.43529412, b: 0.43529412, a: 1}
+    m_SelectedColor: {r: 0.9411765, g: 0.9607843, b: 0.06666667, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -5931,9 +5926,9 @@ MonoBehaviour:
   m_Transition: 1
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_HighlightedColor: {r: 0.94043326, g: 0.9622642, b: 0.06808472, a: 1}
+    m_PressedColor: {r: 0.043137256, g: 0.43529412, b: 0.43529412, a: 1}
+    m_SelectedColor: {r: 0.9411765, g: 0.9607843, b: 0.06666667, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -6032,7 +6027,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1445428276}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
   m_Name: 
@@ -6112,7 +6107,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1445428276}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
   m_Name: 
@@ -6129,7 +6124,7 @@ Canvas:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1445428276}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_RenderMode: 2
   m_Camera: {fileID: 0}
@@ -6161,7 +6156,7 @@ MonoBehaviour:
   _transferOnSecondSelection: 0
   _addNewPointsToFront: 0
   _forwardElement: {fileID: 0}
-  _canvas: {fileID: 0}
+  _canvas: {fileID: 228767076}
 --- !u!1 &1463813219
 GameObject:
   m_ObjectHideFlags: 0
