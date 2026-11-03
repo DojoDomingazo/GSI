@@ -26,7 +26,18 @@ public class NavegacionEsqui : MonoBehaviour
     [SerializeField] private float aceleracionRemo = 1.5f;         // m/s² extra por cada m/s por encima del umbral, por mano
     [SerializeField] private float aceleracionRemoMax = 6f;        // tope de la aceleración total del remo
     [SerializeField] private float suavizadoMano = 20f;            // más alto = el movimiento de las manos se mide con menos retardo
-    [SerializeField] private float velocidadMaxima = 30f;          // m/s, tope de seguridad
+    [SerializeField] private float velocidadTope = 40f;          // m/s, tope de seguridad
+
+    [Header("Posición de huevo (tuck): agachas la cabeza y bajas las manos")]
+    [SerializeField] private bool permitirTuck = true;
+    [SerializeField] private float descensoManosTuck = 1.1f;     // metros que las manos tienen que estar por debajo de tu altura de pie
+    [SerializeField] private bool exigirAgacharse = true;        // además hay que agachar la cabeza
+    [SerializeField] private float descensoCabezaTuck = 0.3f;    // metros que hay que bajar la cabeza respecto a estar de pie
+    [SerializeField] private float confirmacionTuck = 0.2f;      // segundos en postura antes de empezar a acelerar
+    [SerializeField] private float aceleracionTuck = 2f;         // m/s² al empezar
+    [SerializeField] private float crecimientoTuck = 1f;         // m/s² extra por cada segundo seguido en tuck
+    [SerializeField] private float aceleracionTuckMax = 10f;     // tope de la aceleración
+    [SerializeField] private float giroQueCortaTuck = 0.2f;      // si giras más que esto (0 a 1) se corta el tuck
 
     [Header("Pruebas")]
     [SerializeField] private bool usarStickParaPruebas;
@@ -46,6 +57,12 @@ public class NavegacionEsqui : MonoBehaviour
     [SerializeField] private float atrasManoIzquierda;
     [SerializeField] private float atrasManoDerecha;
     [SerializeField] private float aceleracionRemoActual;
+    [SerializeField] private float alturaDePie;
+    [SerializeField] private float bajadaCabeza;
+    [SerializeField] private float bajadaManos;
+    [SerializeField] private bool posturaTuck;
+    [SerializeField] private float tiempoEnTuck;
+    [SerializeField] private float aceleracionTuckActual;
 
     private string estadoAnterior;
     private float tiempoUltimoLog;
@@ -62,6 +79,14 @@ public class NavegacionEsqui : MonoBehaviour
     private float tiempoSinEmpuje;
     private float inicioRemoTiempo, velocidadInicioRemo, picoEmpujeRemo, picoAtrasRemo;
     private float inicioGiroTiempo, velocidadInicioGiro, rumboInicioGiro, giroMaximo, frenoMaxGiro, ladoGiro;
+
+    // Postura (tuck)
+    private Transform cabeza;
+    private bool alturaCalibrada;
+    private bool enSueloActual;
+    private int contadorTucks;
+    private bool tuckLog;
+    private float sinTuckTiempo, inicioTuckTiempo, velocidadInicioTuck, picoAceleracionTuck;
 
     private void Reset()
     {
@@ -87,6 +112,15 @@ public class NavegacionEsqui : MonoBehaviour
         remandoLog = false;
         girandoLog = false;
         tiempoSinEmpuje = 0f;
+
+        // Cabeza: sirve para saber cuánto te agachas
+        cabeza = (rig != null) ? rig.centerEyeAnchor : null;
+        if (cabeza == null && Camera.main != null) cabeza = Camera.main.transform;
+        if (cabeza == null && permitirTuck)
+            Debug.LogWarning("[Nav] No encuentro la cabeza (CenterEyeAnchor): el tuck queda desactivado.", this);
+        alturaCalibrada = false;
+        tiempoEnTuck = 0f;
+        tuckLog = false;
         if (espacio == null)
             Debug.LogWarning("[Nav] No encuentro el espacio de tracking de las manos: el remo queda desactivado.", this);
 
@@ -122,6 +156,8 @@ public class NavegacionEsqui : MonoBehaviour
         manoIzqPrevia = pi;
         manoDerPrevia = pd;
         tieneManoPrevia = true;
+
+        ActualizarPostura(pi.y, pd.y);
     }
 
     private void FixedUpdate()
@@ -150,8 +186,11 @@ public class NavegacionEsqui : MonoBehaviour
         {
             frenoActualPorSegundo = 0f;
             aceleracionRemoActual = 0f;
+            aceleracionTuckActual = 0f;
+            tiempoEnTuck = 0f;
             RegistrarRemo(dt);
             RegistrarGiro();
+            RegistrarTuck(dt);
             return;
         }
 
@@ -170,6 +209,8 @@ public class NavegacionEsqui : MonoBehaviour
             objetoSuelo = "(nada)";
             distanciaSuelo = -1f;
         }
+
+        enSueloActual = enSuelo;
 
         // 1) Giro: giramos la velocidad alrededor de la normal del suelo
         float angulo = direccionActual * velocidadDeGiro * dt;
@@ -192,14 +233,23 @@ public class NavegacionEsqui : MonoBehaviour
             nuevaVelocidad += avance * aceleracionRemoActual * dt;
         }
 
-        // 4) Tope de seguridad
-        if (nuevaVelocidad.magnitude > velocidadMaxima)
-            nuevaVelocidad = nuevaVelocidad.normalized * velocidadMaxima;
+        // 4) Posición de huevo (tuck): acelera cada vez más hasta que giras o te levantas
+        aceleracionTuckActual = CalcularTuck(dt);
+        if (aceleracionTuckActual > 0f)
+        {
+            Vector3 avanceTuck = Vector3.ProjectOnPlane(nuevaVelocidad, normal).normalized;
+            nuevaVelocidad += avanceTuck * aceleracionTuckActual * dt;
+        }
+
+        // 5) Tope de seguridad
+        if (nuevaVelocidad.magnitude > velocidadTope)
+            nuevaVelocidad = nuevaVelocidad.normalized * velocidadTope;
 
         cuerpo.linearVelocity = nuevaVelocidad;
 
         RegistrarRemo(dt);
         RegistrarGiro();
+        RegistrarTuck(dt);
     }
 
     private float CalcularRemo(Vector3 velocidad, bool enSuelo)
@@ -290,6 +340,90 @@ public class NavegacionEsqui : MonoBehaviour
         {
             girandoLog = false;
             Debug.Log($"[Nav] GIRO #{contadorGiros} FIN | duración: {Time.time - inicioGiroTiempo:F1} s | giro máx: {giroMaximo:F2} | freno máx: {frenoMaxGiro * 100f:F0} %/s | rumbo {rumboInicioGiro:F0}° → {rumboGrados:F0}° | velocidad {velocidadInicioGiro:F1} → {velocidadMs:F1} m/s ({velocidadMs - velocidadInicioGiro:+0.0;-0.0} m/s)", this);
+        }
+    }
+
+    // Mide cuánto has bajado la cabeza y las manos respecto a estar de pie (en el espacio de tracking)
+    private void ActualizarPostura(float manoIzqY, float manoDerY)
+    {
+        if (cabeza == null)
+        {
+            posturaTuck = false;
+            return;
+        }
+
+        float cabezaY = espacio.InverseTransformPoint(cabeza.position).y;
+        if (!alturaCalibrada)
+        {
+            alturaDePie = cabezaY;
+            alturaCalibrada = true;
+        }
+        alturaDePie = Mathf.Max(alturaDePie, cabezaY); // la altura de pie es lo más alto que ha estado tu cabeza
+
+        bajadaCabeza = alturaDePie - cabezaY;
+        bajadaManos = alturaDePie - (manoIzqY + manoDerY) * 0.5f;
+
+        bool manosBajas = bajadaManos > descensoManosTuck;
+        bool agachado = !exigirAgacharse || bajadaCabeza > descensoCabezaTuck;
+        posturaTuck = manosBajas && agachado;
+    }
+
+    [ContextMenu("Recalibrar altura de pie")]
+    private void RecalibrarAltura()
+    {
+        alturaCalibrada = false;
+    }
+
+    // Mientras estás en postura, la aceleración crece con el tiempo. Se corta si giras, te levantas o saltas.
+    private float CalcularTuck(float dt)
+    {
+        bool giraMucho = Mathf.Abs(direccionActual) > giroQueCortaTuck;
+        bool puede = permitirTuck && posturaTuck && enSueloActual && !giraMucho;
+
+        if (!puede)
+        {
+            tiempoEnTuck = 0f;
+            return 0f;
+        }
+
+        tiempoEnTuck += dt;
+        if (tiempoEnTuck < confirmacionTuck) return 0f;
+
+        float segundosAcelerando = tiempoEnTuck - confirmacionTuck;
+        return Mathf.Min(aceleracionTuck + crecimientoTuck * segundosAcelerando, aceleracionTuckMax);
+    }
+
+    private void RegistrarTuck(float dt)
+    {
+        if (!mostrarDebug) return;
+
+        if (aceleracionTuckActual > 0f)
+        {
+            sinTuckTiempo = 0f;
+            if (!tuckLog)
+            {
+                tuckLog = true;
+                contadorTucks++;
+                inicioTuckTiempo = Time.time;
+                velocidadInicioTuck = velocidadMs;
+                picoAceleracionTuck = 0f;
+                Debug.Log($"[Nav] TUCK #{contadorTucks} INICIO | cabeza baja: {bajadaCabeza:F2} m | manos bajan: {bajadaManos:F2} m | velocidad: {velocidadMs:F1} m/s", this);
+            }
+            picoAceleracionTuck = Mathf.Max(picoAceleracionTuck, aceleracionTuckActual);
+        }
+        else if (tuckLog)
+        {
+            sinTuckTiempo += dt;
+            if (sinTuckTiempo > 0.1f)
+            {
+                tuckLog = false;
+                string motivo = Mathf.Abs(direccionActual) > giroQueCortaTuck ? "GIRO"
+                              : !posturaTuck ? "TE LEVANTAS"
+                              : !enSueloActual ? "EN EL AIRE"
+                              : "OTRO";
+                float velocidadFinal = cuerpo.linearVelocity.magnitude;
+                Debug.Log($"[Nav] TUCK #{contadorTucks} FIN ({motivo}) | duración: {Time.time - inicioTuckTiempo - sinTuckTiempo:F1} s | aceleración máx: {picoAceleracionTuck:F1} m/s² | velocidad {velocidadInicioTuck:F1} → {velocidadFinal:F1} m/s ({velocidadFinal - velocidadInicioTuck:+0.0;-0.0} m/s)", this);
+            }
         }
     }
 
