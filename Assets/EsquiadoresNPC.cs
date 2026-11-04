@@ -27,6 +27,7 @@ public class EsquiadoresNPC : MonoBehaviour
     [SerializeField] private GeneradorPista pista;          // vacío = lo busca solo
     [SerializeField] private Rigidbody cuerpoJugador;       // vacío = el SkierBody del generador
     [SerializeField] private GameObject esquiadorPrefab;    // vacío = esquiador sencillo hecho por código
+    [SerializeField] private Material materialEsquiador;    // material URP/Lit para el esquiador sencillo (arrastra uno: en el build evita que salga rosa/lila)
 
     [Header("Aparición")]
     [SerializeField] private int maxEsquiadores = 3;
@@ -38,9 +39,9 @@ public class EsquiadoresNPC : MonoBehaviour
     [SerializeField] private float distanciaDesaparicion = 110f;     // se borran a esta distancia de ti (delante o detrás)
 
     [Header("Movimiento")]
-    [SerializeField] private float excesoVelocidadMin = 6f;          // m/s más rápidos que tú al aparecer
-    [SerializeField] private float excesoVelocidadMax = 12f;
-    [SerializeField] private float velocidadMinima = 14f;
+    [SerializeField] private float excesoVelocidadMin = 3f;          // m/s más rápidos que tú al aparecer
+    [SerializeField] private float excesoVelocidadMax = 7f;
+    [SerializeField] private float velocidadMinima = 8f;
     [SerializeField] private float velocidadMaxima = 45f;
     [SerializeField] private float margenBorde = 3f;                 // metros que dejan hasta la valla
     [SerializeField] private float oscilacion = 1f;                  // meneo lateral natural (m)
@@ -74,6 +75,9 @@ public class EsquiadoresNPC : MonoBehaviour
 
     private readonly List<Esquiador> esquiadores = new List<Esquiador>();
     private readonly Collider[] buffer = new Collider[16];
+    private readonly RaycastHit[] golpes = new RaycastHit[8];
+    private readonly Dictionary<Color, Material> materialesPorColor = new Dictionary<Color, Material>();
+    private Material materialBase;
     private Transform contenedor;
     private float proximaAparicion;
     private int creados;
@@ -96,6 +100,7 @@ public class EsquiadoresNPC : MonoBehaviour
             return;
         }
 
+        materialBase = ObtenerMaterialBase();
         contenedor = new GameObject("EsquiadoresNPC").transform;
         proximaAparicion = Time.time + primeraEspera;
     }
@@ -207,6 +212,8 @@ public class EsquiadoresNPC : MonoBehaviour
         Vector3 punto, adelante, derecha;
         if (!pista.PuntoEnPista(e.s, e.lateral, out punto, out adelante, out derecha)) return false;
 
+        punto = AjustarAlSuelo(punto);
+
         // Sigue la inclinación de la pista y se inclina un poco al cambiar de carril
         Vector3 arriba = Vector3.Cross(adelante, derecha).normalized;
         float inclinacion = -Mathf.Clamp(e.velLateral * 2f, -20f, 20f);
@@ -214,6 +221,21 @@ public class EsquiadoresNPC : MonoBehaviour
 
         if (esquivarObstaculos && Time.time >= e.proximaEsquiva) Esquivar(e, punto, adelante, derecha, lim);
         return true;
+    }
+
+    // Comprueba el suelo real justo debajo y se pone encima. Si no encuentra nada, se queda con la altura calculada.
+    private Vector3 AjustarAlSuelo(Vector3 punto)
+    {
+        int n = Physics.RaycastNonAlloc(punto + Vector3.up * 3f, Vector3.down, golpes, 8f, ~0, QueryTriggerInteraction.Ignore);
+        float mejor = float.MaxValue;
+        for (int i = 0; i < n; i++)
+        {
+            if (!golpes[i].collider.name.StartsWith("Tramo_")) continue; // solo pista y terreno
+            if (golpes[i].distance >= mejor) continue;
+            mejor = golpes[i].distance;
+            punto.y = golpes[i].point.y;
+        }
+        return punto;
     }
 
     // Mira hacia delante: si hay un árbol, una valla o un trampolín en el camino, cambia de carril
@@ -292,10 +314,39 @@ public class EsquiadoresNPC : MonoBehaviour
         p.transform.localRotation = Quaternion.Euler(giro);
         p.transform.localScale = escala;
 
-        // PropertyBlock: cambia el color sin crear un material nuevo por cada pieza
-        MaterialPropertyBlock bloque = new MaterialPropertyBlock();
-        bloque.SetColor("_BaseColor", color);
-        bloque.SetColor("_Color", color);
-        p.GetComponent<Renderer>().SetPropertyBlock(bloque);
+        if (materialBase != null) p.GetComponent<Renderer>().sharedMaterial = MaterialDeColor(color);
+    }
+
+    // Los primitivos de Unity salen rosas en el build si no se les pone un material con un shader incluido.
+    // Usamos el material que arrastres; si no hay, buscamos un shader de URP.
+    private Material ObtenerMaterialBase()
+    {
+        if (materialEsquiador != null) return materialEsquiador;
+
+        string[] candidatos = { "Universal Render Pipeline/Lit", "Universal Render Pipeline/Unlit", "Sprites/Default" };
+        foreach (string nombre in candidatos)
+        {
+            Shader sh = Shader.Find(nombre);
+            if (sh == null) continue;
+            Debug.LogWarning($"[Esquiadores] Sin 'Material Esquiador': uso el shader '{nombre}'. Mejor arrastra un material URP/Lit propio.", this);
+            return new Material(sh);
+        }
+
+        Debug.LogError("[Esquiadores] No encuentro ningún shader para los esquiadores. Arrastra un material a 'Material Esquiador'.", this);
+        return null;
+    }
+
+    // Un material por color (se reutilizan, no se crea uno nuevo por esquiador)
+    private Material MaterialDeColor(Color color)
+    {
+        Material m;
+        if (materialesPorColor.TryGetValue(color, out m)) return m;
+
+        m = new Material(materialBase);
+        if (m.HasProperty("_BaseMap")) m.SetTexture("_BaseMap", null);
+        if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", color);
+        if (m.HasProperty("_Color")) m.SetColor("_Color", color);
+        materialesPorColor[color] = m;
+        return m;
     }
 }

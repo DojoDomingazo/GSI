@@ -16,12 +16,18 @@ public class EquiparEsquis : MonoBehaviour
     [SerializeField] private GameObject esquisAgarrables;                    // skier_1
     [SerializeField] private float distanciaHorizontalParaPonerse = 1.2f;    // metros, en horizontal, al centro del cuerpo
     [SerializeField] private float retrasoActivarAgarre = 4f;                // segundos sin poder agarrar los esquís al empezar
+    [SerializeField] private bool usarAgarreFacil = true;                    // true = se agarran con AgarreEsquisFacil (sin Interaction SDK)
 
     [Header("Solo lectura")]
     [SerializeField] private string estado = "ESPERANDO";
     [SerializeField] private float distanciaEsquis;
 
-    private bool equipado, armado;
+    // Posición y rotación fijas de los esquís al empezar (mundo). No son campos del Inspector:
+    // lo que pongas aquí es lo que manda siempre.
+    private static readonly Vector3 posicionInicialEsquis = new Vector3(-434.03f, -746.08f, -125.72f);
+    private static readonly Quaternion rotacionInicialEsquis = Quaternion.Euler(20.5f, 90f, 0f);
+
+    private bool equipado, armado, agarreListo;
     private float ultimoLog;
     private readonly List<GameObject> interaccionesActivas = new List<GameObject>();
     private RigidbodyConstraints constraintsOriginales;
@@ -39,6 +45,7 @@ public class EquiparEsquis : MonoBehaviour
         // Al empezar los esquís no se pueden agarrar: evita conexiones fantasma del agarre a distancia
         if (esquisAgarrables != null)
         {
+            esquisAgarrables.transform.SetPositionAndRotation(posicionInicialEsquis, rotacionInicialEsquis);
             GuardarInteraccionesActivas();
             CambiarInteraccion(false);
             StartCoroutine(ActivarAgarreTrasRetraso());
@@ -54,8 +61,28 @@ public class EquiparEsquis : MonoBehaviour
     {
         yield return new WaitForSeconds(retrasoActivarAgarre);
         if (equipado) yield break;
+        agarreListo = true;
+        if (usarAgarreFacil)
+        {
+            Debug.Log("[Esquis] Agarre fácil activado (el del Interaction SDK se queda apagado)", this);
+            yield break;
+        }
         CambiarInteraccion(true);
         Debug.Log("[Esquis] Agarre activado", this);
+    }
+
+    // ---------- Para AgarreEsquisFacil ----------
+
+    public GameObject Esquis { get { return esquisAgarrables; } }
+    public bool Equipado { get { return equipado; } }
+    public bool AgarrePermitido { get { return agarreListo && !equipado; } }
+
+    // Equivale al "When Select" del Interaction SDK: a partir de aquí se comprueba la distancia al cuerpo
+    public void ArmarAcercamiento()
+    {
+        if (equipado || armado) return;
+        armado = true;
+        CambiarEstado("ACERCANDO");
     }
 
     // Solo recordamos los ISDK_ que estaban activos al empezar: los que tú dejes desactivados se quedan así

@@ -268,7 +268,7 @@ MonoBehaviour:
   _monoscopic: 0
   _sharpenType: 0
   _disableRecording: 0
-  _enableDynamicResolution: 0
+  _enableDynamicResolution: 1
   minDynamicResolutionScale: 1
   maxDynamicResolutionScale: 1
   quest2MinDynamicResolutionScale: 0.7
@@ -1581,6 +1581,7 @@ GameObject:
   - component: {fileID: 402652114}
   - component: {fileID: 402652113}
   - component: {fileID: 402652115}
+  - component: {fileID: 402652116}
   m_Layer: 0
   m_Name: GeneradorPista
   m_TagString: Untagged
@@ -1704,6 +1705,7 @@ MonoBehaviour:
   pista: {fileID: 0}
   cuerpoJugador: {fileID: 0}
   esquiadorPrefab: {fileID: 0}
+  materialEsquiador: {fileID: 2100000, guid: c678cd455a2922f47a0afabbfcfefa76, type: 2}
   maxEsquiadores: 3
   primeraEspera: 8
   intervaloMin: 8
@@ -1711,10 +1713,10 @@ MonoBehaviour:
   distanciaAparicionAtras: 70
   velocidadMinJugador: 3
   distanciaDesaparicion: 110
-  excesoVelocidadMin: 6
-  excesoVelocidadMax: 12
-  velocidadMinima: 14
-  velocidadMaxima: 45
+  excesoVelocidadMin: 3
+  excesoVelocidadMax: 7
+  velocidadMinima: 3
+  velocidadMaxima: 40
   margenBorde: 3
   oscilacion: 1
   velocidadLateral: 6
@@ -1734,6 +1736,36 @@ MonoBehaviour:
   esquiadoresActivos: 0
   sJugador: 0
   lateralJugador: 0
+--- !u!114 &402652116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 402652112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9e4f774df38bee41aba6a1c400aeb4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RayoMenuUI
+  canvases: []
+  rig: {fileID: 0}
+  inclinacionRayo: 0
+  distanciaMaxima: 5
+  vibrarAlPasar: 1
+  frecuenciaMinima: 1
+  reaccion: 10
+  margenBoton: 0.08
+  histeresis: 0.08
+  dibujarRayo: 1
+  colorRayo: {r: 1, g: 1, b: 1, a: 0.9}
+  colorSobreBoton: {r: 0.3, g: 1, b: 0.4, a: 1}
+  grosorRayo: 0.005
+  tamanoPunto: 0.02
+  mostrarDebug: 1
+  botonBajoRayo: '-'
+  manoApuntando: '-'
+  gatilloBloqueado: 0
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -2535,6 +2567,7 @@ GameObject:
   - component: {fileID: 514795957}
   - component: {fileID: 514795958}
   - component: {fileID: 514795959}
+  - component: {fileID: 514795960}
   m_Layer: 0
   m_Name: SkierBody
   m_TagString: Untagged
@@ -2684,6 +2717,7 @@ MonoBehaviour:
   esquisAgarrables: {fileID: 1103313398}
   distanciaHorizontalParaPonerse: 1.2
   retrasoActivarAgarre: 4
+  usarAgarreFacil: 1
   estado: ESPERANDO
   distanciaEsquis: 0
 --- !u!114 &514795956
@@ -2807,6 +2841,32 @@ MonoBehaviour:
   muerto: 0
   ultimoImpacto: 0
   ultimoObjetoGolpeado: 
+--- !u!114 &514795960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 514795949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eeb5a43716547ee438afe9fcf3caa92e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AgarresquisFacil
+  equipar: {fileID: 0}
+  rig: {fileID: 0}
+  alcance: 4
+  holgura: 0.35
+  tiempoAtraccion: 0.35
+  posicionEnMano: {x: 0, y: 0, z: 0.15}
+  inclinacionRayo: 0
+  permitirMirada: 1
+  dibujarRayo: 1
+  colorRayo: {r: 1, g: 0.85, b: 0.2, a: 1}
+  grosorRayo: 0.004
+  resaltado: 1.08
+  mostrarDebug: 1
+  estado: ESPERANDO
 --- !u!1 &564078101
 GameObject:
   m_ObjectHideFlags: 0
@@ -3243,7 +3303,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &774297701
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7265,7 +7325,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1660862824
 RectTransform:
   m_ObjectHideFlags: 0
