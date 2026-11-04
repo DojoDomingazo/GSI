@@ -1580,6 +1580,7 @@ GameObject:
   m_Component:
   - component: {fileID: 402652114}
   - component: {fileID: 402652113}
+  - component: {fileID: 402652115}
   m_Layer: 0
   m_Name: GeneradorPista
   m_TagString: Untagged
@@ -1641,9 +1642,38 @@ MonoBehaviour:
   giroExtraTrampolin: 0
   tramosSinObstaculos: 1
   ponerColliderSiFalta: 1
+  generarEntorno: 1
+  materialTerreno: {fileID: 0}
+  materialRoca: {fileID: 0}
+  anchoTerreno: 100
+  columnasTerreno: 14
+  escalaRelieve: 130
+  alturaMontana: 24
+  profundidadValle: 14
+  zonasLlanas: 0.3
+  alturaMuralla: 32
+  anchoOrilla: 45
+  pendienteRoca: 50
+  ponerColliderTerreno: 1
+  cerrarInicio: 1
+  alturaCierreInicio: 28
+  filasCierreInicio: 8
+  intentosArbolesTerreno: 90
+  anchoBosque: 80
+  densidadBosque: 0.8
+  pendienteMaxArbol: 40
+  escalaBosqueMin: 1
+  escalaBosqueMax: 1.8
+  arbolesPorFrame: 6
+  activarNiebla: 1
+  colorNiebla: {r: 0.8, g: 0.87, b: 0.95, a: 1}
+  nieblaInicio: 60
+  nieblaFin: 180
   tramosActivos: 0
   distanciaAlFinal: 0
   largoVallaMedido: 0
+  anchoTerrenoUsado: 0
+  arbolesEnCola: 0
 --- !u!4 &402652114
 Transform:
   m_ObjectHideFlags: 0
@@ -1659,6 +1689,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &402652115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 402652112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c3a0dd4c45408c438f948a1668497d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EsquiadoresNPC
+  pista: {fileID: 0}
+  cuerpoJugador: {fileID: 0}
+  esquiadorPrefab: {fileID: 0}
+  maxEsquiadores: 3
+  primeraEspera: 8
+  intervaloMin: 8
+  intervaloMax: 16
+  distanciaAparicionAtras: 70
+  velocidadMinJugador: 3
+  distanciaDesaparicion: 110
+  excesoVelocidadMin: 6
+  excesoVelocidadMax: 12
+  velocidadMinima: 14
+  velocidadMaxima: 45
+  margenBorde: 3
+  oscilacion: 1
+  velocidadLateral: 6
+  separacionLateral: 7
+  zonaAviso: 25
+  esquivarObstaculos: 1
+  distanciaSonda: 14
+  radioSonda: 2.2
+  desvio: 4.5
+  coloresChaqueta:
+  - {r: 0.85, g: 0.1, b: 0.12, a: 1}
+  - {r: 0.1, g: 0.35, b: 0.85, a: 1}
+  - {r: 0.95, g: 0.65, b: 0.05, a: 1}
+  - {r: 0.1, g: 0.65, b: 0.3, a: 1}
+  - {r: 0.6, g: 0.15, b: 0.7, a: 1}
+  mostrarDebug: 1
+  esquiadoresActivos: 0
+  sJugador: 0
+  lateralJugador: 0
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
